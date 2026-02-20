@@ -5,8 +5,10 @@ import { router, useFocusEffect } from 'expo-router'
 import { List } from '@/components/List'
 import { Button } from '@/components/Button'
 import { Loading } from '@/components/Loading'
-import { Target, TargetProps } from '@/components/Target'
 import { HomeHeader } from '@/components/HomeHeader'
+import { Target, TargetProps } from '@/components/Target'
+
+import { numberToCurrency } from '@/utils/numberToCurrency'
 
 import { useTargetDatabase } from '@/database/useTargetDatabase'
 
@@ -17,7 +19,7 @@ const summary = {
 }
 
 export default function Index() {
-  const[isFetching, setIsFetching] = useState(true)
+  const [isFetching, setIsFetching] = useState(true)
   const [targets, setTargets] = useState<TargetProps[]>([])
   const targetDatabase = useTargetDatabase()
 
@@ -28,9 +30,9 @@ export default function Index() {
       return response.map(item => ({
         id: String(item.id),
         name: item.name,
-        current: String(item.current),
+        current: numberToCurrency(item.current),
         percentage: item.percentage.toFixed(0) + '%',
-        target: String(item.amount)
+        target: numberToCurrency(item.amount)
       }))
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível carregar as metas.')
@@ -38,7 +40,7 @@ export default function Index() {
     }
   }
 
-  async function fetchData(){
+  async function fetchData() {
     const targetDataPromise = fetchTargets()
 
     const [targetData] = await Promise.all([targetDataPromise])
@@ -56,7 +58,6 @@ export default function Index() {
   if (isFetching) {
     return <Loading />
   }
-
 
   return (
     <View style={{ flex: 1 }}>
