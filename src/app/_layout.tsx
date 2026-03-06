@@ -20,12 +20,10 @@ import { Loading } from '@/components/Loading'
 export default function Layout() {
   useEffect(() => {
     async function hideNavigationBar() {
-      await NavigationBar.setVisibilityAsync("hidden");
-      await NavigationBar.setBehaviorAsync("overlay-swipe");
+      await NavigationBar.setVisibilityAsync('hidden')
     }
-    
-    hideNavigationBar();
-  }, []);
+    hideNavigationBar()
+  }, [])
 
   const [fontsLoaded] = useFonts({
     Inter_700Bold,
