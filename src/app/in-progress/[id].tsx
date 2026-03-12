@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { Alert, View } from 'react-native'
 import { useLocalSearchParams, router, useFocusEffect } from 'expo-router'
+import dayjs from 'dayjs'
 
 import { List } from '@/components/List'
 import { Button } from '@/components/Button'
@@ -13,31 +14,10 @@ import { TransactionTypes } from '@/utils/TransactionTypes'
 import { numberToCurrency } from '@/utils/numberToCurrency'
 
 import { useTargetDatabase } from '@/database/useTargetDatabase'
-
-const transactions: TransctionProps[] = [
-  {
-    id: '1',
-    value: 'R$ 300,00',
-    date: '12/02/2026',
-    description: 'CDB de 110% no banco XPTO',
-    type: TransactionTypes.Input
-  },
-  {
-    id: '2',
-    value: 'R$ 1000,00',
-    date: '20/01/2026',
-    type: TransactionTypes.Output
-  },
-  {
-    id: '3',
-    value: 'R$ 750,00',
-    date: '01/02/2026',
-    description: 'Viagem para o Rio de Janeiro',
-    type: TransactionTypes.Input
-  }
-]
+import { useTransactionDatabase } from '@/database/useTransactionsDatabase'
 
 export default function InProgress() {
+  const [transactions, setTransactions] = useState<TransctionProps[]>([])
   const [isFetching, setIsFetching] = useState(true)
   const [details, setDetails] = useState({
     name: '',
@@ -48,8 +28,9 @@ export default function InProgress() {
   const params = useLocalSearchParams<{ id: string }>()
 
   const targetDatabase = useTargetDatabase()
+  const transactionDatabase = useTransactionDatabase()
 
-  async function fetchDetails() {
+  async function fetchTargetDetails() {
     try {
       const response = await targetDatabase.show(Number(params.id))
       setDetails({
@@ -64,18 +45,40 @@ export default function InProgress() {
     }
   }
 
+  async function fetchTransactions() {
+    try {
+      const response = await transactionDatabase.listByTargetId(
+        Number(params.id)
+      )
+      setTransactions(
+        response.map(item => ({
+          id: String(item.id),
+          value: numberToCurrency(item.amount),
+          date: dayjs(item.created_at).format('DD/MM/YYYY [às] HH:mm'),
+          description: item.observation,
+          type:
+            item.amount < 0 ? TransactionTypes.Output : TransactionTypes.Input
+        }))
+      )
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível carregar as transações.')
+      console.log(error)
+    }
+  }
+
+  async function fetchData() {
+    const fetchDetailsPromise = fetchTargetDetails()
+    const fetchTransactionsPromise = fetchTransactions()
+
+    await Promise.all([fetchDetailsPromise, fetchTransactionsPromise])
+    setIsFetching(false)
+  }
+
   useFocusEffect(
     useCallback(() => {
       fetchData()
     }, [])
   )
-
-  async function fetchData() {
-    const fetchDetailsPromise = fetchDetails()
-
-    await Promise.all([fetchDetailsPromise])
-    setIsFetching(false)
-  }
 
   if (isFetching) {
     return <Loading />
