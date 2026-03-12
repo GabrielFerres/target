@@ -1,6 +1,6 @@
-import { use, useState } from 'react'
+import { useState } from 'react'
 
-import { Alert, View } from 'react-native'
+import { Alert, View, StatusBar } from 'react-native'
 import { useLocalSearchParams, router } from 'expo-router'
 
 import { Input } from '@/components/Input'
@@ -54,6 +54,7 @@ export default function Transaction() {
 
   return (
     <View style={{ flex: 1, padding: 24 }}>
+      <StatusBar barStyle="dark-content" />
       <PageHeader
         title="Nova transação"
         subtitle="A cada valor guardado você fica mais próximo da sua meta."
