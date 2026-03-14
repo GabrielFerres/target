@@ -87,7 +87,7 @@ Certifique-se de ter instalado:
 
 1. **Clone o repositório:**
 ```bash
-git clone [https://github.com/GabrielFerres/target.git](https://github.com/GabrielFerres/target.git)
+git clone [https://github.com/GabrielFerres/target.git]
 cd target
 ```
 2. **Instale as dependências:**
